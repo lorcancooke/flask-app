@@ -1,0 +1,88 @@
+name: Python application
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write # Necessary to use OIDC for authentication
+  actions: write  # Necessary to cancel workflow executions
+  contents: read  # Necessary to read the repository contents 
+
+env:
+  CLOUDSMITH_SERVICE: gh-actions # The slug/id for the Cloudsmith Service Account
+  CLOUDSMITH_WORKSPACE: dmk-software-solutions # The slug/id for the Cloudsmith workspace 
+  CLOUDSMITH_REPOSITORY: nk-demo  # The slug/id for the Cloudsmith Repository
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest 
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Auth to Cloudsmith with OIDC 
+      uses: cloudsmith-io/cloudsmith-cli-action@v2 
+      with:
+        oidc-namespace: ${{ env.CLOUDSMITH_WORKSPACE }}
+        oidc-service-slug: ${{ env.CLOUDSMITH_SERVICE }}
+        oidc-auth-only: 'true' 
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v7
+
+    - name: Install dependencies
+      run: |
+        uv add -r requirements.txt --default-index https:/$CLOUDSMITH_SERVICE:$CLOUDSMITH_API_KEY@dl.cloudsmith.io/basic/$CLOUDSMITH_WORKSPACE/$CLOUDSMITH_REPOSITORY/python/simple/ 
+
+    - name: Run tests
+      run: |
+        uv run pytest test_test1.py -v
+
+    - name: Set up QEMU
+      uses: docker/setup-qemu-action@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Docker Login to Cloudsmith
+      uses: docker/login-action@v3
+      with:
+        registry: docker.cloudsmith.io
+        username: ${{ env.CLOUDSMITH_SERVICE }}
+        password: ${{ env.CLOUDSMITH_API_KEY }} 
+
+    - name: Push with Docker Client
+      run: |
+        docker build --platform linux/arm64 \
+          --build-arg CLOUDSMITH_SERVICE=${{ env.CLOUDSMITH_SERVICE }} \
+          --build-arg CLOUDSMITH_WORKSPACE=${{ env.CLOUDSMITH_WORKSPACE }} \
+          --build-arg CLOUDSMITH_REPOSITORY=${{ env.CLOUDSMITH_REPOSITORY }} \
+          --build-arg CLOUDSMITH_API_KEY=${{ env.CLOUDSMITH_API_KEY }} \
+          --build-arg BUILD_NUMBER=${{ github.run_number }} \
+          --build-arg BUILD_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ") \
+          --build-arg GIT_SHA=${{ github.sha }} \
+          -t docker.cloudsmith.io/${{ env.CLOUDSMITH_WORKSPACE }}/${{ env.CLOUDSMITH_REPOSITORY }}/flask-app:${{github.run_number}} .
+        docker push docker.cloudsmith.io/${{ env.CLOUDSMITH_WORKSPACE }}/${{ env.CLOUDSMITH_REPOSITORY }}/flask-app:${{github.run_number}}
+  
+  insights:
+    runs-on: ubuntu-latest
+    needs: build-publish
+    if: ${{ failure() }}
+    name: Cloudsmith Package Insights
+  
+    steps:
+      - name: Auth to Cloudsmith with OIDC 
+        uses: cloudsmith-io/cloudsmith-cli-action@v1.0.2 
+        with:
+          oidc-namespace: ${{ env.CLOUDSMITH_WORKSPACE }}
+          oidc-service-slug: ${{ env.CLOUDSMITH_SERVICE }}
+          oidc-auth-only: 'true' 
+
+      - name: Run Cloudsmith Package Insights on previous job logs
+        uses: cloudsmith-io/cloudsmith-ci-insights-action@main
+        with:
+          api-key: ${{ env.CLOUDSMITH_API_KEY }}
+          job-name: build-publish
+          follow-up: "Try change package version"
+        env:
+          CLOUDSMITH_API_KEY: ${{ env.CLOUDSMITH_API_KEY }}

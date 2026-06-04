@@ -1,0 +1,4 @@
+Flask
+gunicorn
+pytest
+spotipy==2.25.0

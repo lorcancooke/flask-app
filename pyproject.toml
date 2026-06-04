@@ -1,0 +1,4 @@
+[project]
+name = "cloudsmith-flask-example"
+version = "0.1.0"
+
