@@ -5,7 +5,10 @@ ARG CLOUDSMITH_REPOSITORY
 
 # ---------- Stage 1: Build with dev base image ----------
 
-FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/chainguard/python:latest-dev AS dev
+FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/docker/library/python:3.13-slim AS dev
+
+
+# for chainguard FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/chainguard/python:latest-dev AS dev
 
 ARG CLOUDSMITH_SERVICE
 ARG CLOUDSMITH_WORKSPACE
@@ -21,7 +24,9 @@ RUN pip install -r requirements.txt --index-url https://$CLOUDSMITH_SERVICE:$CLO
 
 # ---------- Stage 2: Final runtime image ----------
 
-FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/chainguard/python:latest
+FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/docker/library/python:3.13-slim
+
+# for chainguard FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/chainguard/python:latest
 
 ARG CLOUDSMITH_WORKSPACE
 ARG CLOUDSMITH_REPOSITORY
