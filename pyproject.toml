@@ -1,6 +1,10 @@
 [project]
 name = "cloudsmith-flask-example"
 version = "0.1.0"
-spotipy>=2.25.1
-
-
+requires-python = ">=3.14"
+dependencies = [
+    "flask",
+    "gunicorn",
+    "pytest",
+    "spotipy>=2.25.1",
+]
