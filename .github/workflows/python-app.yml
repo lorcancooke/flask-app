@@ -28,6 +28,7 @@ jobs:
         oidc-namespace: ${{ env.CLOUDSMITH_WORKSPACE }}
         oidc-service-slug: ${{ env.CLOUDSMITH_SERVICE }}
         oidc-auth-only: 'true' 
+         # Sets CLOUDSMITH_API_KEY to a short-lived OIDC token, not a stored API key
 
     - name: Install uv
       uses: astral-sh/setup-uv@v7
