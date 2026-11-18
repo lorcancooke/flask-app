@@ -1,4 +1,6 @@
 [project]
 name = "cloudsmith-flask-example"
 version = "0.1.0"
+spotipy>=2.25.1
+
 
