@@ -32,14 +32,19 @@ jobs:
     - name: Install uv
       uses: astral-sh/setup-uv@v7
 
+    - name: Point uv at Cloudsmith
+      run: |
+        echo "UV_DEFAULT_INDEX=https://$CLOUDSMITH_SERVICE:$CLOUDSMITH_API_KEY@dl.cloudsmith.io/basic/$CLOUDSMITH_WORKSPACE/$CLOUDSMITH_REPOSITORY/python/simple/" >> $GITHUB_ENV
+
     - name: Install dependencies
       run: |
-        uv add -r requirements.txt --default-index https://$CLOUDSMITH_SERVICE:$CLOUDSMITH_API_KEY@dl.cloudsmith.io/basic/$CLOUDSMITH_WORKSPACE/$CLOUDSMITH_REPOSITORY/python/simple/ 
+        uv venv
+        uv pip install -r requirements.txt 
 
     - name: Run tests
       run: |
-        uv run pytest test_test1.py -v
-
+        .venv/bin/python -m pytest test_test1.py -v
+        
     - name: Set up QEMU
       uses: docker/setup-qemu-action@v3
 
@@ -74,7 +79,7 @@ jobs:
   
     steps:
       - name: Auth to Cloudsmith with OIDC 
-        uses: cloudsmith-io/cloudsmith-cli-action@v1.0.2 
+        uses: cloudsmith-io/cloudsmith-cli-action@v2 
         with:
           oidc-namespace: ${{ env.CLOUDSMITH_WORKSPACE }}
           oidc-service-slug: ${{ env.CLOUDSMITH_SERVICE }}
