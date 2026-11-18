@@ -8,7 +8,7 @@ ARG CLOUDSMITH_REPOSITORY
 FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/python:latest-dev AS dev
 
 # for docker hub FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/python:3.15.0b4-alpine3.23 AS dev
-# for chainguard FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/chainguard/python:latest-dev AS dev
+# for chainguard FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/python:latest-dev AS dev
 
 ARG CLOUDSMITH_SERVICE
 ARG CLOUDSMITH_WORKSPACE
@@ -27,7 +27,7 @@ RUN pip install -r requirements.txt --index-url https://$CLOUDSMITH_SERVICE:$CLO
 FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/python:latest
 
 # for dockerhub  FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/python:3.15.0b4-alpine3.23
-# for chainguard FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/chainguard/python:latest
+# for chainguard FROM docker.cloudsmith.io/${CLOUDSMITH_WORKSPACE}/${CLOUDSMITH_REPOSITORY}/python:latest
 
 ARG CLOUDSMITH_WORKSPACE
 ARG CLOUDSMITH_REPOSITORY
